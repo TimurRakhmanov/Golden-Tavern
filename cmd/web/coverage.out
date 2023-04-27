@@ -1,0 +1,13 @@
+mode: set
+github.com/RakhmanovTimur/bookings/cmd/web/main.go:23.13,25.16 2 0
+github.com/RakhmanovTimur/bookings/cmd/web/main.go:25.16,27.3 1 0
+github.com/RakhmanovTimur/bookings/cmd/web/main.go:28.2,36.16 4 0
+github.com/RakhmanovTimur/bookings/cmd/web/main.go:36.16,38.3 1 0
+github.com/RakhmanovTimur/bookings/cmd/web/main.go:41.18,56.16 10 1
+github.com/RakhmanovTimur/bookings/cmd/web/main.go:56.16,59.3 2 0
+github.com/RakhmanovTimur/bookings/cmd/web/main.go:61.2,70.12 6 1
+github.com/RakhmanovTimur/bookings/cmd/web/middleware.go:10.53,11.71 1 0
+github.com/RakhmanovTimur/bookings/cmd/web/middleware.go:11.71,14.3 2 0
+github.com/RakhmanovTimur/bookings/cmd/web/middleware.go:18.45,28.2 3 1
+github.com/RakhmanovTimur/bookings/cmd/web/middleware.go:31.50,33.2 1 1
+github.com/RakhmanovTimur/bookings/cmd/web/routes.go:12.49,36.2 18 1
