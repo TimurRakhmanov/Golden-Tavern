@@ -71,14 +71,6 @@
               </form>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <p id="myPar">This is some text</p>
-                <p>
-                    <button id="colorButton" class="btn btn-outline-secondary">Click me</button>
-                </p>
-            </div>
-        </div>
     </div>
     <div class="row my-footer">
         <div class="col">
@@ -176,7 +168,7 @@
                 timer: 3000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
                     toast.addEventListener('mouseleave', Swal.resumeTimer)
                     }
                 })
