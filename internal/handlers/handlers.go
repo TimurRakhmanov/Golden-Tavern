@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/RakhmanovTimur/bookings/pkg/config"
-	"github.com/RakhmanovTimur/bookings/pkg/models"
-	"github.com/RakhmanovTimur/bookings/pkg/render"
+	"github.com/RakhmanovTimur/bookings/internal/config"
+	"github.com/RakhmanovTimur/bookings/internal/models"
+	"github.com/RakhmanovTimur/bookings/internal/render"
 )
 
 // Repo is the repository used by handlers
