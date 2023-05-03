@@ -3,10 +3,11 @@ package handlers
 import (
 	"encoding/gob"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
-	"text/template"
 	"time"
 
 	"github.com/RakhmanovTimur/bookings/internal/config"
@@ -26,9 +27,17 @@ var functions = template.FuncMap{}
 func getRoutes() http.Handler {
 	// what am I going to put in the session
 	gob.Register(models.Reservation{})
+
 	// change this to true when in production
 	app.InProduction = false
 
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.InfoLog = infoLog
+
+	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	app.ErrorLog = errorLog
+
+	// set up the session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
@@ -39,7 +48,7 @@ func getRoutes() http.Handler {
 
 	tc, err := CreateTestTemplateCache()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("cannot create template cache")
 	}
 
 	app.TemplateCache = tc
@@ -49,13 +58,13 @@ func getRoutes() http.Handler {
 	NewHandlers(repo)
 
 	render.NewTemplates(&app)
-	// http.HandleFunc("/", Repo.Home)
-	// http.HandleFunc("/about", Repo.About)
+
 	mux := chi.NewRouter()
 
 	mux.Use(middleware.Recoverer)
 	// mux.Use(NoSurf)
 	mux.Use(SessionLoad)
+
 	mux.Get("/", Repo.Home)
 	mux.Get("/about", Repo.About)
 	mux.Get("/generals-quarters", Repo.Generals)
@@ -73,10 +82,11 @@ func getRoutes() http.Handler {
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
 	return mux
 }
 
-// NoSurf adds CSRF protection to all POST requests
+// NoSurf is the csrf protection middleware
 func NoSurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
 
@@ -89,25 +99,24 @@ func NoSurf(next http.Handler) http.Handler {
 	return csrfHandler
 }
 
-// SessionLoad loads and saves the session on every request
+// SessionLoad loads and saves session data for current request
 func SessionLoad(next http.Handler) http.Handler {
 	return session.LoadAndSave(next)
 }
 
+// CreateTestTemplateCache creates a template cache as a map
 func CreateTestTemplateCache() (map[string]*template.Template, error) {
-	// another approach: myCache := make(map[string]*template.Template) a
+
 	myCache := map[string]*template.Template{}
 
-	// get all the files named *.page.tmpl from ./template
 	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.tmpl", pathToTemplates))
 	if err != nil {
 		return myCache, err
 	}
 
-	// range through all files ending with *.page.tmpl
 	for _, page := range pages {
 		name := filepath.Base(page)
-		ts, err := template.New(name).ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return myCache, err
 		}
@@ -116,14 +125,16 @@ func CreateTestTemplateCache() (map[string]*template.Template, error) {
 		if err != nil {
 			return myCache, err
 		}
+
 		if len(matches) > 0 {
 			ts, err = ts.ParseGlob(fmt.Sprintf("%s/*.layout.tmpl", pathToTemplates))
+			if err != nil {
+				return myCache, err
+			}
 		}
-		if err != nil {
-			return myCache, err
-		}
+
 		myCache[name] = ts
 	}
-	return myCache, nil
 
+	return myCache, nil
 }
