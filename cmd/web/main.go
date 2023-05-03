@@ -10,6 +10,7 @@ import (
 
 	"github.com/RakhmanovTimur/bookings/internal/config"
 	"github.com/RakhmanovTimur/bookings/internal/handlers"
+	"github.com/RakhmanovTimur/bookings/internal/helpers"
 	"github.com/RakhmanovTimur/bookings/internal/models"
 	"github.com/RakhmanovTimur/bookings/internal/render"
 	"github.com/alexedwards/scs/v2"
@@ -74,6 +75,7 @@ func run() error {
 	handlers.NewHandlers(repo)
 
 	render.NewTemplates(&app)
+	helpers.NewHelpers(&app)
 	// http.HandleFunc("/", handlers.Repo.Home)
 	// http.HandleFunc("/about", handlers.Repo.About)
 	return err
