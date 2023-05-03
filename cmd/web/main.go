@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/RakhmanovTimur/bookings/internal/config"
@@ -18,6 +19,8 @@ const portNumber = ":8080"
 
 var app config.AppConfig
 var session *scs.SessionManager
+var infoLog *log.Logger
+var errLog *log.Logger
 
 // main is the main application function
 func main() {
@@ -43,6 +46,12 @@ func run() error {
 	gob.Register(models.Reservation{})
 	// change this to true when in production
 	app.InProduction = false
+
+	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.InfoLog = infoLog
+
+	errLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	app.ErrorLog = errLog
 
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
