@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
-	"text/template"
 
 	"github.com/RakhmanovTimur/bookings/internal/config"
 	"github.com/RakhmanovTimur/bookings/internal/models"
