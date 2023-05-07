@@ -112,17 +112,47 @@ func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 }
 
 type jsonResponse struct {
-	OK      bool   `json:"ok"`
-	Message string `json:"message"`
+	OK        bool   `json:"ok"`
+	Message   string `json:"message"`
+	RoomID    string `json:"room_id"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 // AvailabilityJSON renders the search-availability page
 func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
-	resp := jsonResponse{
-		OK:      false,
-		Message: "Available!",
+
+	sd := r.Form.Get("start")
+	ed := r.Form.Get("end")
+
+	layout := "2006-01-02"
+
+	start_date, err := time.Parse(layout, sd)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+	end_date, err := time.Parse(layout, ed)
+	if err != nil {
+		helpers.ServerError(w, err)
 	}
 
+	roomID, err := strconv.Atoi(r.Form.Get("room_id"))
+	log.Println(roomID)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	available, err := m.DB.SearchAvailabilityByDatesByRoomID(roomID, start_date, end_date)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+	resp := jsonResponse{
+		OK:        available,
+		Message:   "",
+		StartDate: sd,
+		EndDate:   ed,
+		RoomID:    strconv.Itoa(roomID),
+	}
 	out, err := json.MarshalIndent(resp, "", "     ")
 	if err != nil {
 		helpers.ServerError(w, err)
@@ -146,8 +176,16 @@ func (m *Repository) MakeReservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sd := res.StartDate.Format("2006-01-02")
-	ed := res.StartDate.Format("2006-01-02")
+	room, err := m.DB.GetRoomByID(res.RoomID)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	res.Room.RoomName = room.RoomName
+	m.App.Session.Put(r.Context(), "reservation", res)
+	layout := "2006-01-02"
+	sd := res.StartDate.Format(layout)
+	ed := res.EndDate.Format(layout)
 
 	stringMap := make(map[string]string)
 	stringMap["start_date"] = sd
@@ -163,42 +201,22 @@ func (m *Repository) MakeReservation(w http.ResponseWriter, r *http.Request) {
 
 // PostReservation handles the posting of the reservation form
 func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	reservation, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		helpers.ServerError(w, errors.New("can't reservation get from session"))
+		return
+	}
+
 	err := r.ParseForm()
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
 	}
 
-	sd := r.Form.Get("start_date")
-	ed := r.Form.Get("end_date")
-
-	// 2023-01-01 format --- 01/02 03:04:05PM '06 -0700
-	layout := "2006-01-02"
-	startDate, err := time.Parse(layout, sd)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-	endDate, err := time.Parse(layout, ed)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	roomID, err := strconv.Atoi(r.Form.Get("room_id"))
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-	reservation := models.Reservation{
-		FirstName: r.Form.Get("first_name"),
-		LastName:  r.Form.Get("last_name"),
-		Email:     r.Form.Get("email"),
-		Phone:     r.Form.Get("phone"),
-		StartDate: startDate,
-		EndDate:   endDate,
-		RoomID:    roomID,
-	}
+	reservation.FirstName = r.Form.Get("first_name")
+	reservation.LastName = r.Form.Get("last_name")
+	reservation.Phone = r.Form.Get("phone")
+	reservation.Email = r.Form.Get("email")
 
 	form := forms.New(r.PostForm)
 
@@ -224,10 +242,10 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	restriction := models.RoomRestriction{
-		StartDate:     startDate,
-		EndDate:       endDate,
+		StartDate:     reservation.StartDate,
+		EndDate:       reservation.EndDate,
 		ReservationID: newReservationID,
-		RoomID:        roomID,
+		RoomID:        reservation.RoomID,
 		RestrictionID: 1,
 	}
 
@@ -240,6 +258,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
 }
 
+// Displays a reservation summary page
 func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) {
 	reservation, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
 	if !ok {
@@ -252,11 +271,22 @@ func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) 
 	m.App.Session.Remove(r.Context(), "reservation")
 	data := make(map[string]interface{})
 	data["reservation"] = reservation
+
+	sd := reservation.StartDate.Format("2006-01-02")
+	ed := reservation.EndDate.Format("2006-01-02")
+
+	stringMap := make(map[string]string)
+
+	stringMap["start_date"] = sd
+	stringMap["end_date"] = ed
+
 	render.Template(w, r, "reservation-summary.page.tmpl", &models.TemplateData{
-		Data: data,
+		Data:      data,
+		StringMap: stringMap,
 	})
 }
 
+// Displays a list of available rooms
 func (m *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
 	exploded := strings.Split(r.RequestURI, "/")
 	roomID, err := strconv.Atoi(exploded[2])
@@ -274,4 +304,39 @@ func (m *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
 
 	m.App.Session.Put(r.Context(), "reservation", res)
 	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
+}
+
+// BookRoom takes URL parameters, builds a sessional variable and takes use to make-reservation screen
+func (m *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
+	roomID, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+	sd := r.URL.Query().Get("s")
+
+	ed := r.URL.Query().Get("e")
+
+	var res models.Reservation
+
+	res.RoomID = roomID
+	layout := "2006-01-02"
+	startDate, err := time.Parse(layout, sd)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+	endDate, err := time.Parse(layout, ed)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+	room, err := m.DB.GetRoomByID(roomID)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	res.StartDate = startDate
+	res.EndDate = endDate
+	res.Room.RoomName = room.RoomName
+
+	m.App.Session.Put(r.Context(), "reservation", res)
+	http.Redirect(w, r, "/make-reservation", http.StatusTemporaryRedirect)
 }
