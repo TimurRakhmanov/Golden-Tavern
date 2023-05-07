@@ -1,1 +1,1 @@
-delete from room_restrictions;
+delete from restrictions;
