@@ -392,7 +392,9 @@ func (m *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
 	}
 	room, err := m.DB.GetRoomByID(roomID)
 	if err != nil {
-		helpers.ServerError(w, err)
+		m.App.Session.Put(r.Context(), "error", "Can't get room from db!")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
 	}
 
 	res.StartDate = startDate
