@@ -32,6 +32,9 @@ func main() {
 	}
 	defer db.SQL.Close()
 
+	// Close mail channel when application stops
+	defer close(app.MailChan)
+	listenForMail()
 	fmt.Println(fmt.Sprintf("Starting application on port %s", portNumber))
 	// _ = http.ListenAndServe(portNumber, nil)
 
@@ -51,6 +54,11 @@ func run() (*driver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
+
+	// Set up the mail channel
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
+
 	// change this to true when in production
 	app.InProduction = false
 
