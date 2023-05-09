@@ -152,7 +152,7 @@ function searchAvailability(roomID){
         formData.append("csrf_token", "{{.CSRFToken}}");
         formData.append("room_id", roomID);
         fetch("/search-availability-json", {
-            method: "post",
+            method: "POST",
             body: formData,
         })
             .then((response) => response.json())
