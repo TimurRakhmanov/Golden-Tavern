@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -333,10 +332,11 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	Your reservation is set from %s to %s.`, reservation.FirstName, reservation.StartDate, reservation.EndDate)
 
 	msgToGuest := models.MailData{
-		To:      reservation.Email,
-		From:    "reservationservice@sc.com",
-		Subject: "Reservation Confirmation",
-		Content: template.HTML(htmlMessageToGuest),
+		To:       reservation.Email,
+		From:     "reservationservice@sc.com",
+		Subject:  "Reservation Confirmation",
+		Content:  htmlMessageToGuest,
+		Template: "basic.html",
 	}
 
 	m.App.MailChan <- msgToGuest
@@ -345,8 +345,8 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	<strong>New Reservation Application</strong> <br>
 	Details:<br>
 	<ol>
-	<li>Guest Name: %s %s,</ li>
-	<li>Room: %s,<li>
+	<li>Guest Name: %s %s,</li>
+	<li>Room: %s,</li>
 	<li>Email Address: %s,</li>
 	<li>Phone Number: %s,</li>
 	<li>Starting date: %s</li>
@@ -358,7 +358,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		To:      "owner@sc.com",
 		From:    "reservationservice@sc.com",
 		Subject: "New Reservation Confirmation",
-		Content: template.HTML(htmlMessageToOwner),
+		Content: htmlMessageToOwner,
 	}
 
 	m.App.MailChan <- msgToOwner
