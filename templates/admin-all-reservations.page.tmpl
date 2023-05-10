@@ -5,5 +5,8 @@ All Reservations
 {{ end }}
 
 {{define "content"}}
-<div class="col-md-12">This page is secure.</div>
+<div class="col-md-12">{{$res := index .Data "reservations"}}
+{{range $res}}
+{{.ID }} <br>
+{{end}}</div>
 {{ end }}
