@@ -15,6 +15,10 @@ import (
 	"github.com/justinas/nosurf"
 )
 
+var functions = template.FuncMap{
+	"humanDate": HumanDate,
+}
+
 var app *config.AppConfig
 var pathToTemplates = "./templates"
 
@@ -23,6 +27,7 @@ func NewRenderer(a *config.AppConfig) {
 	app = a
 }
 
+// Returns time in a readable format
 func HumanDate(t time.Time) string {
 	return t.Format("2006-01-02")
 }
@@ -88,7 +93,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 	// range through all files ending with *.page.tmpl
 	for _, page := range pages {
 		name := filepath.Base(page)
-		ts, err := template.New(name).ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return myCache, err
 		}
