@@ -17,6 +17,7 @@ import (
 	"github.com/RakhmanovTimur/bookings/internal/render"
 	"github.com/RakhmanovTimur/bookings/internal/repository"
 	"github.com/RakhmanovTimur/bookings/internal/repository/dbrepo"
+	"github.com/go-chi/chi"
 )
 
 // Repo is the repository used by handlers
@@ -617,4 +618,20 @@ func (m *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Req
 func (m *Repository) AdminReservationsCalender(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "admin-reservations-calender.page.tmpl", &models.TemplateData{})
 
+}
+
+// AdminProcessReservation marks a reservation as processed
+func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	src := chi.URLParam(r, "src")
+
+	_ = m.DB.UpdateProcessedForReservation(id, 1)
+
+	m.App.Session.Put(r.Context(), "flash", "Reservation Updated")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
