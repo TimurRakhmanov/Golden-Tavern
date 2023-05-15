@@ -5,5 +5,9 @@ Reservation Calender
 {{ end }}
 
 {{define "content"}}
-<div class="col-md-12">This page is secure.</div>
+<div class="col-md-12">
+    <div class="text-center">
+        {{index .StringMap "this_month"}} {{index .StringMap "this_month_year"}}
+    </div>
+</div>
 {{ end }}
