@@ -32,6 +32,11 @@ func HumanDate(t time.Time) string {
 	return t.Format("2006-01-02")
 }
 
+// FormatDate formats a given date into a specified format
+func FormatDate(t time.Time, f string) string {
+	return t.Format(f)
+}
+
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
 	td.Flash = app.Session.PopString(r.Context(), "flash")
 	td.Error = app.Session.PopString(r.Context(), "error")
