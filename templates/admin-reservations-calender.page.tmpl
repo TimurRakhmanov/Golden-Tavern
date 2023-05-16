@@ -6,6 +6,8 @@ Reservation Calender
 
 {{define "content"}}
 {{$now := index .Data "now"}}
+{{$rooms := index .Data "rooms"}}
+{{$dim := index .IntMap "days_in_month"}}
 <div class="col-md-12">
     <div class="text-center">
         <h3>{{formatDate $now "January"}} {{formatDate $now "2006"}}</h3>
