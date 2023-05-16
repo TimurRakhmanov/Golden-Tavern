@@ -25,5 +25,27 @@ Reservation Calender
         </a>
     </div>
     <div class="clearfix"></div>
+    {{range $rooms}}
+        {{$roomID := .ID}}
+        <h4 class="mt-4">{{.RoomName}}1</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm">
+                <tr class="table-dark"> 
+                    {{range $index := iterate $dim}}
+                        <td class="text-center">
+                            {{add $index 1}}
+                        </td>
+                    {{end}}
+                </tr>
+                <tr>
+                    {{range $index := iterate $dim}}
+                    <td class="text-center">
+                            <input type="checkbox"/>
+                    </td>
+                    {{end}}
+                </tr>
+            </table>
+        </div>
+    {{end}}
 </div>
 {{ end }}
