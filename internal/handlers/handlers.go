@@ -694,7 +694,7 @@ func (m *Repository) AdminReservationsCalender(w http.ResponseWriter, r *http.Re
 
 			} else {
 				// if it's a block
-				blockMap[y.StartDate.Format("2006-01-2")] = y.RestrictionID
+				blockMap[y.StartDate.Format("2006-01-2")] = y.ID
 			}
 		}
 		data[fmt.Sprintf("reservation_map_%d", x.ID)] = reservationMap
