@@ -44,6 +44,9 @@ Reservation Calender
                 <tr>
                     {{range $index := iterate $dim}}
                     <td class="text-center">
+                        {{if gt (index $reservations (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0}}
+                            
+                        {{else}}
                             <input 
                                 {{if gt (index $blocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0}}
                                     checked
@@ -54,6 +57,8 @@ Reservation Calender
                                 {{end}}
                                     type="checkbox"/>
  
+                        {{end}}
+
                     </td>
                     {{end}}
                 </tr>

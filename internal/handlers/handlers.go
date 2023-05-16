@@ -672,7 +672,7 @@ func (m *Repository) AdminReservationsCalender(w http.ResponseWriter, r *http.Re
 		reservationMap := make(map[string]int)
 		blockMap := make(map[string]int)
 
-		for d := firstOfMonth; d.After(lastOfMonth); d = d.AddDate(0, 0, 1) {
+		for d := firstOfMonth; !d.After(lastOfMonth); d = d.AddDate(0, 0, 1) {
 			reservationMap[d.Format("2006-01-2")] = 0
 			blockMap[d.Format("2006-01-2")] = 0
 		}
@@ -688,7 +688,7 @@ func (m *Repository) AdminReservationsCalender(w http.ResponseWriter, r *http.Re
 			if y.ReservationID > 0 {
 				// if it's a reservation
 
-				for d := y.StartDate; d.After(y.EndDate); d = d.AddDate(0, 0, 1) {
+				for d := y.StartDate; !d.After(y.EndDate); d = d.AddDate(0, 0, 1) {
 					reservationMap[d.Format("2006-01-2")] = y.ReservationID
 				}
 
