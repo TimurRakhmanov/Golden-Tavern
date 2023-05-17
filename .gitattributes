@@ -1,2 +1,2 @@
 * linguist-vendored
-*.css linguist-vendored=true
+*.go linguist-vendored=false
