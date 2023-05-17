@@ -711,6 +711,11 @@ func (m *Repository) AdminReservationsCalender(w http.ResponseWriter, r *http.Re
 
 }
 
+// AdminPostReservationsCalender handles post of reservation calender
+func (m *Repository) AdminPostReservationsCalender(w http.ResponseWriter, r *http.Request) {
+	log.Println("Works")
+}
+
 // AdminProcessReservation marks a reservation as processed
 func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Request) {
 
