@@ -713,7 +713,19 @@ func (m *Repository) AdminReservationsCalender(w http.ResponseWriter, r *http.Re
 
 // AdminPostReservationsCalender handles post of reservation calender
 func (m *Repository) AdminPostReservationsCalender(w http.ResponseWriter, r *http.Request) {
-	log.Println("Works")
+	err := r.ParseForm()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	year, _ := strconv.Atoi(r.Form.Get("y"))
+	month, _ := strconv.Atoi(r.Form.Get("m"))
+
+	// process blocks
+
+	m.App.Session.Put(r.Context(), "flash", "Changes Saved")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calender?y=%d&m=%d", year, month), http.StatusSeeOther)
 }
 
 // AdminProcessReservation marks a reservation as processed
