@@ -23,11 +23,20 @@ import (
 var app config.AppConfig
 var session *scs.SessionManager
 var pathToTemplates = "./../../templates"
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"humanDate":  render.HumanDate,
+	"formatDate": render.FormatDate,
+	"iterate":    render.Iterate,
+	"add":        render.Add,
+}
 
 func TestMain(m *testing.M) {
 	// what am I going to put in the session
 	gob.Register(models.Reservation{})
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
+	gob.Register(map[string]int{})
 
 	// change this to true when in production
 	app.InProduction = false
@@ -100,6 +109,24 @@ func getRoutes() http.Handler {
 	mux.Get("/make-reservation", Repo.MakeReservation)
 	mux.Post("/make-reservation", Repo.PostReservation)
 	mux.Get("/reservation-summary", Repo.ReservationSummary)
+	mux.Get("/user/login", Repo.ShowLogin)
+	mux.Post("/user/login", Repo.PostShowLogin)
+	mux.Get("/user/logout", Repo.Logout)
+
+	mux.Route("/admin", func(mux chi.Router) {
+		// mux.Use(Auth)
+
+		mux.Get("/dashboard", Repo.AdminDashboard)
+		mux.Get("/reservations-new", Repo.AdminNewReservations)
+		mux.Get("/reservations-all", Repo.AdminAllReservations)
+		mux.Get("/reservations-calender", Repo.AdminReservationsCalender)
+		mux.Post("/reservations-calender", Repo.AdminPostReservationsCalender)
+		mux.Get("/process-reservation/{src}/{id}/do", Repo.AdminProcessReservation)
+		mux.Get("/delete-reservation/{src}/{id}/do", Repo.AdminDeleteReservation)
+
+		mux.Get("/reservations/{src}/{id}/show", Repo.AdminShowReservation)
+		mux.Post("/reservations/{src}/{id}/show", Repo.AdminPostShowReservation)
+	})
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
