@@ -37,7 +37,6 @@ func main() {
 	defer close(app.MailChan)
 	listenForMail()
 	fmt.Println(fmt.Sprintf("Starting application on port %s", portNumber))
-	// _ = http.ListenAndServe(portNumber, nil)
 
 	srv := &http.Server{
 		Addr:    portNumber,
@@ -117,7 +116,5 @@ func run() (*driver.DB, error) {
 
 	render.NewRenderer(&app)
 	helpers.NewHelpers(&app)
-	// http.HandleFunc("/", handlers.Repo.Home)
-	// http.HandleFunc("/about", handlers.Repo.About)
 	return db, err
 }
