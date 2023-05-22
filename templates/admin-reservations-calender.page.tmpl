@@ -36,7 +36,7 @@ Reservation Calender
             {{$roomID := .ID}}
             {{$blocks := index $.Data (printf "block_map_%d" .ID)}}
             {{$reservations := index $.Data (printf "reservation_map_%d" .ID)}}
-            <h4 class="mt-4">{{.RoomName}}1</h4>
+            <h4 class="mt-4">{{.RoomName}}</h4>
             <div class="table-responsive">
                 <table class="table table-bordered table-sm">
                     <tr class="table-dark"> 
