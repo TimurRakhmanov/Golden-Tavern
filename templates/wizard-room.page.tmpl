@@ -1,0 +1,154 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="container">
+
+        <div class="text-center mt-2">
+            <div class="col">
+                <img src="/static/images/wizards-room.png" class="img-fluid img-thumbnail mx-auto d-block room-image" alt="image of the wizzard's image">
+            </div>
+            <div class="col-4">
+                
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col">
+                <h1 class="text-center mt-4">Wizard's Room</h1>
+                <p>
+                    Step into the realm of arcane wonders and unravel the secrets of the "Wizard's Room" 
+                    within the fabled Golden Tavern. A sanctuary of mystic energy and ancient knowledge awaits 
+                    those who dare to venture within. Adorned with shimmering tapestries depicting spellbinding 
+                    tales, the room emanates an aura of enchantment. Delight in the cozy ambiance as flickering 
+                    candles cast dancing shadows upon shelves brimming with ancient tomes and mystical artifacts. 
+                    Allow your imagination to soar as you recline on plush velvet cushions, surrounded by the whispers 
+                    of forgotten spells and the crackling of a magical fireplace. Indulge in libations crafted with 
+                    arcane precision, unlocking flavors that transcend the mundane. The Wizard's Room at Golden Tavern,
+                    where the line between reality and magic blurs, beckoning the seekers of arcane wonders.
+                </p>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <h1>Price List</h1>
+        </div>
+        <div class="row mb-3">
+            <table class="table">
+                    <thead>
+                        <tr>
+                        <th scope="col">Number of Days</th>
+                        <th scope="col">Price for a signle guest</th>
+                        <th scope="col">Price for two guests</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <th scope="row">From 1 to 7</th>
+                        <td>3 bronze per night</td>
+                        <td>5 bronze per night</td>
+                        </tr>
+                        <tr>
+                        <th scope="row">From 8 to 14</th>
+                        <td>2 bronze per night</td>
+                        <td>4 bronze per night</td>
+                        </tr>
+                        <tr>
+                        <th scope="row">From 15</th>
+                        <td>2 bronze per night + free breakfast</td>
+                        <td>4 bronze per night + free breakfast</td>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
+
+        <div class="row">
+
+            <div class="col text-center">
+
+                <a id="check-availability-button" href="#!" class="btn btn-success">Make Reservation</a>
+
+            </div>
+        </div>
+
+
+    </div>
+{{end}}
+
+
+{{define "js"}}
+<script>
+    document.getElementById("check-availability-button").addEventListener("click", function () {
+        let html = `
+<form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
+    <div class="form-row">
+        <div class="col">
+            <div class="form-row" id="reservation-dates-modal">
+                <div class="col">
+                    <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
+                </div>
+                <div class="col">
+                    <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+`
+        attention.custom({
+            msg: html,
+            title: "Choose your dates",
+
+            willOpen: () => {
+                const elem = document.getElementById('reservation-dates-modal');
+                const rp = new DateRangePicker(elem, {
+                    format: 'yyyy-mm-dd',
+                    showOnFocus: true,
+                    minDate: new Date(),
+                })
+            },
+
+            didOpen: () => {
+                document.getElementById('start').removeAttribute('disabled');
+                document.getElementById('end').removeAttribute('disabled');
+
+            },
+
+            callback: function (result) {
+                console.log("called");
+
+                let form = document.getElementById("check-availability-form");
+                let formData = new FormData(form);
+                formData.append("csrf_token", "{{.CSRFToken}}");
+                formData.append("room_id", "2");
+
+                fetch('/search-availability-json', {
+                    method: "post",
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.ok) {
+                            attention.custom({
+                                icon: 'success',
+                                showConfirmButton: false,
+                                msg: '<p>Room is available!</p>'
+                                    + '<p><a href="/book-room?id='
+                                    + data.room_id
+                                    + '&s='
+                                    + data.start_date
+                                    + '&e='
+                                    + data.end_date
+                                    + '" class="btn btn-primary">'
+                                    + 'Book now!</a></p>',
+                            })
+                        } else {
+                            attention.error({
+                                msg: "No availability",
+                            })
+                        }
+                    })
+            }
+        });
+    })
+</script>
+{{end}}
