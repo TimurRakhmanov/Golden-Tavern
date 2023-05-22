@@ -62,9 +62,9 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "about.page.tmpl", &models.TemplateData{})
 }
 
-// Generals renders the room page
-func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "generals.page.tmpl", &models.TemplateData{})
+// TravelerRoom renders the room page
+func (m *Repository) TravelerRoom(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "traveler-room.page.tmpl", &models.TemplateData{})
 }
 
 // WizardRoom renders the room page

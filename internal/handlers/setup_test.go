@@ -97,7 +97,7 @@ func getRoutes() http.Handler {
 
 	mux.Get("/", Repo.Home)
 	mux.Get("/about", Repo.About)
-	mux.Get("/generals-quarters", Repo.Generals)
+	mux.Get("/traveler-room", Repo.TravelerRoom)
 	mux.Get("/wizard-room", Repo.WizardRoom)
 
 	mux.Get("/search-availability", Repo.Availability)
