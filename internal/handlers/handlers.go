@@ -67,9 +67,9 @@ func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "generals.page.tmpl", &models.TemplateData{})
 }
 
-// Majors renders the room page
-func (m *Repository) Majors(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "majors.page.tmpl", &models.TemplateData{})
+// WizardRoom renders the room page
+func (m *Repository) WizardRoom(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "wizard-room.page.tmpl", &models.TemplateData{})
 }
 
 // Availability renders the search-availability page
