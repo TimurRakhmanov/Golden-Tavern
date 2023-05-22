@@ -103,21 +103,15 @@ function Prompt(){
 
 function searchAvailability(roomID){
     {
-    // notify("This is my message", "warning")
-    // notifyModal("title", "<em>Hello, world</em>",  "success", "myText");
     attention.error({ msg: "Oops" });
     let html = `
         <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
-            <div class="row">
+            <div class="row" id="reservation-dates-modal">
                 <div class="col">
-                    <div class="row" id="reservation-dates-modal">
-                        <div class="col">
-                            <input required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
-                        </div>
-                        <div class="col">
-                            <input required class="form-control" type="text" name="end" id="end" placeholder="Departure">
-                        </div>
-                    </div>
+                    <input required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
+                </div>
+                <div class="col">
+                    <input required class="form-control" type="text" name="end" id="end" placeholder="Departure">
                 </div>
             </div>
         </form>
@@ -140,7 +134,6 @@ function searchAvailability(roomID){
         document.getElementById("end").removeAttribute("disabled");
         },
         callback: function (result) {
-        console.log("called");
         let form = document.getElementById("check-availability-form");
         let formData = new FormData(form);
         formData.append("csrf_token", "{{.CSRFToken}}");
