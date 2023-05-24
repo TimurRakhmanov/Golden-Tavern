@@ -1,0 +1,147 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="container">
+
+        <div class="row">
+            <div class="col">
+                <img src="/static/images/traveler-room.jpg"
+                     class="img-fluid img-thumbnail mx-auto d-block room-image" alt="room image">
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col">
+                <h1 class="text-center mt-4">Traveler's Room</h1>
+                <p>    
+                    Step into a realm of timeless charm and embark on an unforgettable journey 
+                    at The Enchanted Traveler's Haven, where medieval-inspired accommodations 
+                    await intrepid travelers. Immerse yourself in the authentic atmosphere of 
+                    the Middle Ages with intricately carved wooden furnishings, tapestries adorning 
+                    the walls, and soft candlelight casting a warm glow. Experience the ultimate relaxation 
+                    in a plush four-poster bed, surrounded by rich fabrics, while the crackling fireplace serenades 
+                    you into a peaceful slumber. Indulge in modern comforts seamlessly integrated into this medieval 
+                    haven, ensuring your stay is as enchanting as it is convenient. Welcome to a world where history 
+                    and hospitality intertwine to create an extraordinary retreat for the discerning traveler.
+                </p>
+            </div>
+        </div>
+                <div class="text-center mt-3">
+            <h1>Price List</h1>
+        </div>
+        <div class="row mb-3">
+            <table class="table">
+                    <thead>
+                        <tr>
+                        <th scope="col">Number of Days</th>
+                        <th scope="col">Price for a signle guest in coins</th>
+                        <th scope="col">Price for two guests in coins</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <th scope="row">From 1 to 7</th>
+                        <td>2 bronze per night</td>
+                        <td>4 bronze per night</td>
+                        </tr>
+                        <tr>
+                        <th scope="row">From 8 to 14</th>
+                        <td>1 bronze per night</td>
+                        <td>2 bronze per night</td>
+                        </tr>
+                        <tr>
+                        <th scope="row">From 15</th>
+                        <td>1 bronze per night + free breakfast</td>
+                        <td>2 bronze per night + free breakfast</td>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
+
+        <div class="row">
+
+            <div class="col text-center">
+
+                <a id="check-availability-button" href="#!" class="btn btn-success">Make Reservation</a>
+
+            </div>
+        </div>
+
+
+    </div>
+{{end}}
+
+{{define "js"}}
+    <script>
+        document.getElementById("check-availability-button").addEventListener("click", function () {
+            let html = `
+                <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
+                    <div class="row" id="reservation-dates-modal">
+                        <div class="col">
+                            <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
+                        </div>
+                        <div class="col">
+                            <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
+                        </div>
+                    </div>
+                </form>
+                `
+            attention.custom({
+                msg: html,
+                title: "Choose your dates",
+
+                willOpen: () => {
+                    const elem = document.getElementById('reservation-dates-modal');
+                    const rp = new DateRangePicker(elem, {
+                        format: 'yyyy-mm-dd',
+                        showOnFocus: true,
+                        minDate: new Date(),
+                    })
+                },
+
+                didOpen: () => {
+                    document.getElementById('start').removeAttribute('disabled');
+                    document.getElementById('end').removeAttribute('disabled');
+
+                },
+
+                callback: function (result) {
+                    console.log("called");
+
+                    let form = document.getElementById("check-availability-form");
+                    let formData = new FormData(form);
+                    formData.append("csrf_token", "{{.CSRFToken}}");
+                    formData.append("room_id", "1");
+
+                    fetch('/search-availability-json', {
+                        method: "post",
+                        body: formData,
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.ok) {
+                                attention.custom({
+                                    icon: 'success',
+                                    showConfirmButton: false,
+                                    msg: '<p>Room is available!</p>'
+                                        + '<p><a href="/book-room?id='
+                                        + data.room_id
+                                        + '&s='
+                                        + data.start_date
+                                        + '&e='
+                                        + data.end_date
+                                        + '" class="btn btn-primary">'
+                                        + 'Book now!</a></p>',
+                                })
+                            } else {
+                                attention.error({
+                                    msg: "No availability",
+                                })
+                            }
+                        })
+                }
+            });
+        })
+    </script>
+{{end}}
