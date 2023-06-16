@@ -521,7 +521,37 @@ func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{})
+	total_reservations, err := m.DB.GetTotalReservations()
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+	revenue_total := 0
+	room_ids, err := m.DB.GetRoomIDs()
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+	for id := range room_ids {
+		var revenue int
+		revenue, err = m.DB.GetRevenueByRoom(id)
+		if err != nil {
+			helpers.ServerError(w, err)
+		}
+		revenue_total += revenue
+	}
+	var todos []models.TodoData
+	todos, err = m.DB.GetToDoList()
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	data := make(map[string]interface{})
+	data["count"] = total_reservations
+	data["revenue"] = revenue_total
+	data["todos"] = todos
+
+	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{
+		Data: data,
+	})
 }
 
 // Shows all reservations in admin tool
